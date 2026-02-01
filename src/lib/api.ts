@@ -65,21 +65,33 @@ export const authAPI = {
 // Journal API
 export const journalAPI = {
   create: async (content: string, allowAIMemory: boolean = false) => {
-    return apiRequest('/journal', {
-      method: 'POST',
-      body: JSON.stringify({
-        entry: content,
-      }),
-    });
+    try {
+      const response = await apiRequest('/journal', {
+        method: 'POST',
+        body: JSON.stringify({
+          entry: content,
+        }),
+      });
+      return { success: true, ...response };
+    } catch (err: any) {
+      console.error('Journal save error:', err);
+      return { success: false };
+    }
   },
 
   createEncrypted: async (encryptedPayload: string, allowAIMemory: boolean = false) => {
-    return apiRequest('/journal', {
-      method: 'POST',
-      body: JSON.stringify({
-        entry: encryptedPayload,
-      }),
-    });
+    try {
+      const response = await apiRequest('/journal', {
+        method: 'POST',
+        body: JSON.stringify({
+          entry: encryptedPayload,
+        }),
+      });
+      return { success: true, ...response };
+    } catch (err: any) {
+      console.error('Journal save error:', err);
+      return { success: false };
+    }
   },
 
   list: async (limit: number = 50, offset: number = 0) => {
@@ -123,14 +135,24 @@ export const journalAPI = {
 // Chat API
 export const chatAPI = {
   sendMessage: async (message: string, mode: string = 'LISTEN', allowMemory: boolean = false) => {
-    return apiRequest('/chat', {
-      method: 'POST',
-      body: JSON.stringify({
-        prompt: message,
-        mode,
-        allow_memory: allowMemory,
-      }),
-    });
+    try {
+      const response = await apiRequest('/chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          prompt: message,
+          mode,
+          allow_memory: allowMemory,
+        }),
+      });
+      return response;
+    } catch (err: any) {
+      console.error('Chat error:', err);
+      return {
+        success: false,
+        response: "I'm here with you. Please try again.",
+        message: "I'm here with you. Please try again.",
+      };
+    }
   },
 
   getSession: async () => {
