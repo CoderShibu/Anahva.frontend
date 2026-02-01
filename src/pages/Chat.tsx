@@ -68,10 +68,10 @@ const Chat = () => {
       setIsTyping(false);
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error: any) {
-      console.error('Chat error:', error);
+      console.error("Chat error:", error?.message || error);
       const aiMessage: Message = {
         id: messages.length + 2,
-        text: "Sorry, something went wrong. Please try again.",
+        text: "I'm here with you. Let's try again.",
         isAI: true,
         timestamp: new Date(),
       };
