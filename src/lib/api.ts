@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://anahva-backend-vh3h.vercel.app/api';
 
 // Get auth token from localStorage
 const getAuthToken = (): string | null => {
