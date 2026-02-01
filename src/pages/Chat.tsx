@@ -5,7 +5,7 @@ import { useConfidentialMode } from '@/contexts/ConfidentialModeContext';
 import { useNightWatch } from '@/contexts/NightWatchContext';
 import { useStressMode } from '@/contexts/StressModeContext';
 import Navigation from '@/components/Navigation';
-import { Send, Heart, Moon } from 'lucide-react';
+import { Send, Heart, Moon, Mic } from 'lucide-react';
 import { sendChatMessage } from '@/api/chat';
 
 interface Message {

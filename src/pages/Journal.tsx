@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useConfidentialMode } from '@/contexts/ConfidentialModeContext';
 import Navigation from '@/components/Navigation';
-import { Save, Sparkles, ChevronRight, Lock, Check } from 'lucide-react';
+import { Save, Sparkles, ChevronRight, Lock, Check, Mic } from 'lucide-react';
 import { saveJournal } from '@/api/journal';
 import { useToast } from '@/components/ui/use-toast';
 
