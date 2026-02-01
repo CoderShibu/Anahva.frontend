@@ -132,7 +132,7 @@ const Journal = () => {
             >
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" />
-                {t('journalPrompt')}
+                Start writing...
               </p>
               {prompts.map((prompt, index) => (
                 <motion.button
@@ -163,7 +163,7 @@ const Journal = () => {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={t('journalPlaceholder')}
+            placeholder="What's on your mind today?"
             className={`w-full min-h-[300px] p-6 rounded-2xl bg-card border border-border/50 text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all ${isConfidential ? 'font-mono' : ''}`}
             spellCheck={false}
           />

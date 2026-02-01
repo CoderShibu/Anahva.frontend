@@ -96,7 +96,7 @@ const Chat = () => {
             </div>
             <div>
               <h1 className="font-display text-xl text-foreground">Anahva</h1>
-              <p className="text-xs text-muted-foreground">{t('yourSanctuary')}</p>
+              <p className="text-xs text-muted-foreground">Your sanctuary for thoughts</p>
             </div>
           </div>
           {isNightMode && (
@@ -158,7 +158,7 @@ const Chat = () => {
                     ))}
                   </div>
                   <span className="text-sm text-muted-foreground ml-2">
-                    {t('anahataTyping')}
+                    Thinking...
                   </span>
                 </div>
               </motion.div>
@@ -188,7 +188,7 @@ const Chat = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder={t('typeMessage')}
+            placeholder="Type your message..."
             className="flex-1 input-sanctuary"
           />
 
