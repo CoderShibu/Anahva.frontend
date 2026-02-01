@@ -83,7 +83,21 @@ export const journalAPI = {
   },
 
   list: async (limit: number = 50, offset: number = 0) => {
-    return apiRequest(`/journal/list?limit=${limit}&offset=${offset}`);
+    try {
+      const journals = await apiRequest(`/journal/history`);
+      return {
+        success: true,
+        journals: journals.map((j: any) => ({
+          id: j._id || j.id,
+          content: j.entry,
+          created_at: j.createdAt,
+          encrypted_payload: j.entry,
+        })),
+      };
+    } catch (err) {
+      console.error('Failed to fetch journal history:', err);
+      return { success: false, journals: [] };
+    }
   },
 
   delete: async (id: string) => {
