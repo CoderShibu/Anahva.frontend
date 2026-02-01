@@ -10,6 +10,7 @@ import { ConfidentialModeProvider } from "@/contexts/ConfidentialModeContext";
 import { NightWatchProvider } from "@/contexts/NightWatchContext";
 import { StressModeProvider } from "@/contexts/StressModeContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
@@ -54,30 +55,32 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <AccessibilityProvider>
-        <ConfidentialModeProvider>
-          <NightWatchProvider>
-            <StressModeProvider>
-              <LanguageProvider>
-                <AuthProvider>
-                  <TooltipProvider>
-                    <AnimatedBackground />
-                    <Toaster />
-                    <Sonner />
-                    <BrowserRouter>
-                      <AppRoutes />
-                    </BrowserRouter>
-                  </TooltipProvider>
-                </AuthProvider>
-              </LanguageProvider>
-            </StressModeProvider>
-          </NightWatchProvider>
-        </ConfidentialModeProvider>
-      </AccessibilityProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AccessibilityProvider>
+          <ConfidentialModeProvider>
+            <NightWatchProvider>
+              <StressModeProvider>
+                <LanguageProvider>
+                  <AuthProvider>
+                    <TooltipProvider>
+                      <AnimatedBackground />
+                      <Toaster />
+                      <Sonner />
+                      <BrowserRouter>
+                        <AppRoutes />
+                      </BrowserRouter>
+                    </TooltipProvider>
+                  </AuthProvider>
+                </LanguageProvider>
+              </StressModeProvider>
+            </NightWatchProvider>
+          </ConfidentialModeProvider>
+        </AccessibilityProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
