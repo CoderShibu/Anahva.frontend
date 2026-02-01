@@ -5,7 +5,7 @@ import { useConfidentialMode } from '@/contexts/ConfidentialModeContext';
 
 const AnimatedBackground = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { isNightWatch } = useNightWatch();
+    const { isNightMode } = useNightWatch();
     const { isConfidential } = useConfidentialMode();
 
     useEffect(() => {
@@ -37,7 +37,7 @@ const AnimatedBackground = () => {
                 // Green/Matrix-like for confidential
                 color1 = [20, 40, 20];
                 color2 = [30, 60, 30];
-            } else if (isNightWatch) {
+            } else if (isNightMode) {
                 // Deep Blue/Black for night
                 color1 = [10, 10, 25];
                 color2 = [20, 20, 40];
@@ -54,14 +54,14 @@ const AnimatedBackground = () => {
 
         // Instead of complex canvas which might fail again, let's return a simple div with CSS keyframes
         // The previous implementation was likely CSS or Canvas.
-    }, [isNightWatch, isConfidential]);
+    }, [isNightMode, isConfidential]);
 
     return (
         <div className="fixed inset-0 -z-50 transition-colors duration-1000 ease-in-out overflow-hidden pointer-events-none">
             {/* Background Layer */}
             <div className={`absolute inset-0 opacity-40 ${isConfidential ? 'bg-green-950' :
-                    isNightWatch ? 'bg-slate-950' :
-                        'bg-amber-50/50'
+                isNightMode ? 'bg-slate-950' :
+                    'bg-amber-50/50'
                 }`} />
 
             {/* Floating Orbs (CSS Animation) */}
