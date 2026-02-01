@@ -24,9 +24,14 @@ const Journal = () => {
 
   // Auto-save with debounce
   const handleSave = useCallback(async (text: string) => {
-    if (isConfidential || !text.trim()) return;
+    // Don't save if confidential mode or empty/whitespace-only content
+    if (isConfidential || !text || !text.trim()) {
+      console.log("[Journal] Skipping save - empty or confidential:", { isConfidential, isEmpty: !text.trim() });
+      return;
+    }
 
     setIsSaving(true);
+    console.log("[Journal] Saving entry...");
     try {
       await saveJournal(text);
       setLastSaved(new Date());
@@ -34,8 +39,9 @@ const Journal = () => {
         title: "Saved",
         description: "Journal entry saved successfully"
       });
+      console.log("[Journal] Save successful");
     } catch (error) {
-      console.error('Failed to save journal:', error);
+      console.error('[Journal] Failed to save journal:', error);
       toast({
         title: 'Error',
         description: 'Failed to save journal entry',
@@ -48,7 +54,10 @@ const Journal = () => {
 
   // Debounced save
   useEffect(() => {
-    if (isConfidential || !content.trim()) return;
+    // Don't trigger auto-save for empty or whitespace-only content
+    if (isConfidential || !content || !content.trim()) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       handleSave(content);

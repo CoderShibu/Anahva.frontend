@@ -7,6 +7,7 @@ import { useStressMode } from '@/contexts/StressModeContext';
 import Navigation from '@/components/Navigation';
 import { Send, Heart, Moon, Mic } from 'lucide-react';
 import { sendChatMessage } from '@/api/chat';
+import { chatHistoryAPI } from '@/lib/api';
 
 interface Message {
   id: number;
@@ -53,12 +54,18 @@ const Chat = () => {
     };
 
     setMessages([...messages, userMessage]);
+    // Save user message to chat history
+    chatHistoryAPI.saveMessage(userMessage);
+
     const userInput = input;
     setInput('');
     setIsTyping(true);
 
     try {
+      console.log("[Chat] Sending message to backend:", userInput);
       const reply = await sendChatMessage(userInput);
+      console.log("[Chat] Received reply from backend:", reply);
+
       const aiMessage: Message = {
         id: messages.length + 2,
         text: reply,
@@ -67,16 +74,23 @@ const Chat = () => {
       };
       setIsTyping(false);
       setMessages((prev) => [...prev, aiMessage]);
+      // Save AI message to chat history
+      chatHistoryAPI.saveMessage(aiMessage);
     } catch (error: any) {
-      console.error("Chat error:", error?.message || error);
+      console.error("[Chat] ERROR - Full error object:", error);
+      console.error("[Chat] ERROR - Error message:", error?.message || error);
+      console.error("[Chat] ERROR - Error stack:", error?.stack);
+
       const aiMessage: Message = {
         id: messages.length + 2,
-        text: "I'm here with you. Let's try again.",
+        text: `I'm having trouble connecting to the AI. Error: ${error?.message || 'Unknown error'}. Please check the console for details.`,
         isAI: true,
         timestamp: new Date(),
       };
       setIsTyping(false);
       setMessages((prev) => [...prev, aiMessage]);
+      // Save error message to chat history too
+      chatHistoryAPI.saveMessage(aiMessage);
     }
   };
 
@@ -196,8 +210,8 @@ const Chat = () => {
             onClick={handleSend}
             disabled={!input.trim()}
             className={`p-3 rounded-xl transition-all ${input.trim()
-                ? 'bg-primary text-primary-foreground glow-gold'
-                : 'bg-secondary text-muted-foreground'
+              ? 'bg-primary text-primary-foreground glow-gold'
+              : 'bg-secondary text-muted-foreground'
               }`}
             whileHover={input.trim() ? { scale: 1.05 } : {}}
             whileTap={input.trim() ? { scale: 0.95 } : {}}
