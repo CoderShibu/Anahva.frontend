@@ -61,167 +61,148 @@ const Chat = () => {
     setInput('');
     setIsTyping(true);
 
-    try {
-      console.log("[Chat] Sending message to backend:", userInput);
-      const reply = await sendChatMessage(userInput);
-      console.log("[Chat] Received reply from backend:", reply);
+    // Simplified logic - NO fallback, NO try/catch as requested
+    const reply = await sendChatMessage(userInput);
 
-      const aiMessage: Message = {
-        id: messages.length + 2,
-        text: reply,
-        isAI: true,
-        timestamp: new Date(),
-      };
-      setIsTyping(false);
-      setMessages((prev) => [...prev, aiMessage]);
-      // Save AI message to chat history
-      chatHistoryAPI.saveMessage(aiMessage);
-    } catch (error: any) {
-      console.error("[Chat] ERROR - Full error object:", error);
-      console.error("[Chat] ERROR - Error message:", error?.message || error);
-      console.error("[Chat] ERROR - Error stack:", error?.stack);
+    const aiMessage: Message = {
+      id: messages.length + 2,
+      text: reply,
+      isAI: true,
+      timestamp: new Date(),
+    };
+    setIsTyping(false);
+    setMessages((prev) => [...prev, aiMessage]);
+    // Save AI message to chat history
+    chatHistoryAPI.saveMessage(aiMessage);
 
-      const aiMessage: Message = {
-        id: messages.length + 2,
-        text: `I'm having trouble connecting to the AI. Error: ${error?.message || 'Unknown error'}. Please check the console for details.`,
-        isAI: true,
-        timestamp: new Date(),
-      };
-      setIsTyping(false);
-      setMessages((prev) => [...prev, aiMessage]);
-      // Save error message to chat history too
-      chatHistoryAPI.saveMessage(aiMessage);
-    }
+    return (
+      <div className="min-h-screen bg-background pb-24 md:pb-8 md:pl-64 flex flex-col">
+        <Navigation />
+
+        <motion.div
+          className="px-6 py-4 border-b border-border bg-charcoal-deep/50 backdrop-blur-lg md:ml-0"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <Heart className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-display text-xl text-foreground">Anahva</h1>
+                <p className="text-xs text-muted-foreground">Your sanctuary for thoughts</p>
+              </div>
+            </div>
+            {isNightMode && (
+              <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-1 rounded-full w-fit">
+                <Moon className="w-3 h-3" />
+                <span>Night-Watch Mode: Gentle listening</span>
+              </div>
+            )}
+            {isConfidential && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full w-fit mt-2">
+                <span>Confidential Mode: No memory stored</span>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <AnimatePresence>
+              {messages.map((message, index) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className={`flex ${message.isAI ? 'justify-start' : 'justify-end'}`}
+                >
+                  <div
+                    className={`max-w-[85%] ${message.isAI ? 'chat-bubble-ai' : 'chat-bubble bg-primary/20'
+                      }`}
+                  >
+                    <p className="text-foreground leading-relaxed">{message.text}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {isTyping && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex justify-start"
+                >
+                  <div className="chat-bubble-ai flex items-center gap-2">
+                    <div className="flex gap-1">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          className="w-2 h-2 rounded-full bg-primary/60"
+                          animate={{ y: [0, -6, 0] }}
+                          transition={{
+                            duration: 0.6,
+                            repeat: Infinity,
+                            delay: i * 0.15,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-muted-foreground ml-2">
+                      Thinking...
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+
+        <motion.div
+          className="px-6 py-4 border-t border-border bg-charcoal-deep/50 backdrop-blur-lg"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="max-w-2xl mx-auto flex items-center gap-3">
+            <motion.button
+              className="p-3 rounded-xl bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Mic className="w-5 h-5" />
+            </motion.button>
+
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Type your message..."
+              className="flex-1 input-sanctuary"
+            />
+
+            <motion.button
+              onClick={handleSend}
+              disabled={!input.trim()}
+              className={`p-3 rounded-xl transition-all ${input.trim()
+                ? 'bg-primary text-primary-foreground glow-gold'
+                : 'bg-secondary text-muted-foreground'
+                }`}
+              whileHover={input.trim() ? { scale: 1.05 } : {}}
+              whileTap={input.trim() ? { scale: 0.95 } : {}}
+            >
+              <Send className="w-5 h-5" />
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    );
   };
 
-  return (
-    <div className="min-h-screen bg-background pb-24 md:pb-8 md:pl-64 flex flex-col">
-      <Navigation />
-
-      <motion.div
-        className="px-6 py-4 border-b border-border bg-charcoal-deep/50 backdrop-blur-lg md:ml-0"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="font-display text-xl text-foreground">Anahva</h1>
-              <p className="text-xs text-muted-foreground">Your sanctuary for thoughts</p>
-            </div>
-          </div>
-          {isNightMode && (
-            <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-1 rounded-full w-fit">
-              <Moon className="w-3 h-3" />
-              <span>Night-Watch Mode: Gentle listening</span>
-            </div>
-          )}
-          {isConfidential && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full w-fit mt-2">
-              <span>Confidential Mode: No memory stored</span>
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="max-w-2xl mx-auto space-y-4">
-          <AnimatePresence>
-            {messages.map((message, index) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`flex ${message.isAI ? 'justify-start' : 'justify-end'}`}
-              >
-                <div
-                  className={`max-w-[85%] ${message.isAI ? 'chat-bubble-ai' : 'chat-bubble bg-primary/20'
-                    }`}
-                >
-                  <p className="text-foreground leading-relaxed">{message.text}</p>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {isTyping && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="flex justify-start"
-              >
-                <div className="chat-bubble-ai flex items-center gap-2">
-                  <div className="flex gap-1">
-                    {[0, 1, 2].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-2 h-2 rounded-full bg-primary/60"
-                        animate={{ y: [0, -6, 0] }}
-                        transition={{
-                          duration: 0.6,
-                          repeat: Infinity,
-                          delay: i * 0.15,
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-muted-foreground ml-2">
-                    Thinking...
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      <motion.div
-        className="px-6 py-4 border-t border-border bg-charcoal-deep/50 backdrop-blur-lg"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="max-w-2xl mx-auto flex items-center gap-3">
-          <motion.button
-            className="p-3 rounded-xl bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Mic className="w-5 h-5" />
-          </motion.button>
-
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type your message..."
-            className="flex-1 input-sanctuary"
-          />
-
-          <motion.button
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className={`p-3 rounded-xl transition-all ${input.trim()
-              ? 'bg-primary text-primary-foreground glow-gold'
-              : 'bg-secondary text-muted-foreground'
-              }`}
-            whileHover={input.trim() ? { scale: 1.05 } : {}}
-            whileTap={input.trim() ? { scale: 0.95 } : {}}
-          >
-            <Send className="w-5 h-5" />
-          </motion.button>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
-
-export default Chat;
+  export default Chat;
