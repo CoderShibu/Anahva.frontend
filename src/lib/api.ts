@@ -65,30 +65,19 @@ export const authAPI = {
 // Journal API
 export const journalAPI = {
   create: async (content: string, allowAIMemory: boolean = false) => {
-    // Use simple payload for now - backend will accept any base64 string
-    // that's at least 50 characters (to pass validation)
-    const payload = {
-      content,
-      timestamp: new Date().toISOString(),
-      nonce: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    };
-    const encryptedPayload = btoa(JSON.stringify(payload));
-
-    return apiRequest('/journal/create', {
+    return apiRequest('/journal', {
       method: 'POST',
       body: JSON.stringify({
-        encrypted_payload: encryptedPayload,
-        allow_ai_memory: allowAIMemory,
+        entry: content,
       }),
     });
   },
 
   createEncrypted: async (encryptedPayload: string, allowAIMemory: boolean = false) => {
-    return apiRequest('/journal/create', {
+    return apiRequest('/journal', {
       method: 'POST',
       body: JSON.stringify({
-        encrypted_payload: encryptedPayload,
-        allow_ai_memory: allowAIMemory,
+        entry: encryptedPayload,
       }),
     });
   },
@@ -120,10 +109,10 @@ export const journalAPI = {
 // Chat API
 export const chatAPI = {
   sendMessage: async (message: string, mode: string = 'LISTEN', allowMemory: boolean = false) => {
-    return apiRequest('/chat/message', {
+    return apiRequest('/chat', {
       method: 'POST',
       body: JSON.stringify({
-        message,
+        prompt: message,
         mode,
         allow_memory: allowMemory,
       }),
