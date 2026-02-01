@@ -4,10 +4,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useConfidentialMode } from '@/contexts/ConfidentialModeContext';
 import { useNightWatch } from '@/contexts/NightWatchContext';
 import { useStressMode } from '@/contexts/StressModeContext';
-import { detectIndianContext } from '@/utils/regionalContext';
 import Navigation from '@/components/Navigation';
-import { Send, Mic, Heart, Moon } from 'lucide-react';
-import { chatAPI, chatHistoryAPI } from '@/lib/api';
+import { Send, Heart, Moon } from 'lucide-react';
+import { sendChatMessage } from '@/api/chat';
 
 interface Message {
   id: number;
@@ -26,7 +25,7 @@ const Chat = () => {
       id: 1,
       text: isNightMode
         ? "It's late, and nights can feel heavier. I'm here to listen, no judgment. What's on your heart?"
-        : t('aiGreeting'),
+        : "Hello, I'm Anahva. I'm here to listen. What's on your heart?",
       isAI: true,
       timestamp: new Date(),
     },
@@ -54,47 +53,28 @@ const Chat = () => {
     };
 
     setMessages([...messages, userMessage]);
-
-    // Save user message if not confidential
-    if (!isConfidential) {
-      chatHistoryAPI.saveMessage(userMessage);
-    }
-
     const userInput = input;
     setInput('');
     setIsTyping(true);
 
     try {
-      // Try backend API first
-      const mode = stressMode ? 'CALM' : isNightMode ? 'LISTEN' : 'REFLECT';
-      const response = await chatAPI.sendMessage(userInput, mode, !isConfidential);
-
+      const reply = await sendChatMessage(userInput);
       const aiMessage: Message = {
         id: messages.length + 2,
-        text: response.response || response.message || 'I understand. How are you feeling?',
+        text: reply,
         isAI: true,
         timestamp: new Date(),
       };
-
       setIsTyping(false);
       setMessages((prev) => [...prev, aiMessage]);
-
-      // Save AI message if not confidential
-      if (!isConfidential) {
-        chatHistoryAPI.saveMessage(aiMessage);
-      }
     } catch (error: any) {
-      console.error('Chat API error:', error);
-
-      const errorMessage = error.message || "I'm having trouble connecting to the AI server. Please check the backend logs.";
-
+      console.error('Chat error:', error);
       const aiMessage: Message = {
         id: messages.length + 2,
-        text: `[Error] ${errorMessage}`,
+        text: "Sorry, something went wrong. Please try again.",
         isAI: true,
         timestamp: new Date(),
       };
-
       setIsTyping(false);
       setMessages((prev) => [...prev, aiMessage]);
     }

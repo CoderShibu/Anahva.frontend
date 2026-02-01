@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useConfidentialMode } from '@/contexts/ConfidentialModeContext';
 import Navigation from '@/components/Navigation';
-import { Save, Mic, Sparkles, ChevronRight, Lock, Check } from 'lucide-react';
-import { journalAPI } from '@/lib/api';
+import { Save, Sparkles, ChevronRight, Lock, Check } from 'lucide-react';
+import { saveJournal } from '@/api/journal';
 import { useToast } from '@/components/ui/use-toast';
 
 const Journal = () => {
@@ -23,13 +23,17 @@ const Journal = () => {
   }, [isConfidential]);
 
   // Auto-save with debounce
-  const saveJournal = useCallback(async (text: string) => {
+  const handleSave = useCallback(async (text: string) => {
     if (isConfidential || !text.trim()) return;
 
     setIsSaving(true);
     try {
-      await journalAPI.create(text, false);
+      await saveJournal(text);
       setLastSaved(new Date());
+      toast({
+        title: "Saved",
+        description: "Journal entry saved successfully"
+      });
     } catch (error) {
       console.error('Failed to save journal:', error);
       toast({
@@ -47,16 +51,16 @@ const Journal = () => {
     if (isConfidential || !content.trim()) return;
 
     const timer = setTimeout(() => {
-      saveJournal(content);
+      handleSave(content);
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [content, isConfidential, saveJournal]);
+  }, [content, isConfidential, handleSave]);
 
   const prompts = [
-    { id: 1, text: t('journalPrompt1') },
-    { id: 2, text: t('journalPrompt2') },
-    { id: 3, text: t('journalPrompt3') },
+    { id: 1, text: "How am I feeling today?" },
+    { id: 2, text: "What's been on my mind lately?" },
+    { id: 3, text: "What am I grateful for today?" },
   ];
 
   const handlePromptClick = (promptText: string) => {
