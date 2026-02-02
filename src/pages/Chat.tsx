@@ -21,6 +21,7 @@ const Chat = () => {
   const { isConfidential } = useConfidentialMode();
   const { isNightMode } = useNightWatch();
   const { stressMode } = useStressMode();
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -31,6 +32,7 @@ const Chat = () => {
       timestamp: new Date(),
     },
   ]);
+
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -41,47 +43,59 @@ const Chat = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isTyping]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
-      id: messages.length + 1,
+      id: Date.now(),
       text: input,
       isAI: false,
       timestamp: new Date(),
     };
 
-    setMessages([...messages, userMessage]);
-    // Save user message to chat history
+    setMessages((prev) => [...prev, userMessage]);
     chatHistoryAPI.saveMessage(userMessage);
 
     const userInput = input;
     setInput('');
     setIsTyping(true);
 
-    // Simplified logic - NO fallback, NO try/catch as requested
-    const reply = await sendChatMessage(userInput);
+    try {
+      const reply = await sendChatMessage(userInput);
 
-    const aiMessage: Message = {
-      id: messages.length + 2,
-      text: reply,
-      isAI: true,
-      timestamp: new Date(),
-    };
-    setIsTyping(false);
-    setMessages((prev) => [...prev, aiMessage]);
-    // Save AI message to chat history
-    chatHistoryAPI.saveMessage(aiMessage);
+      const aiMessage: Message = {
+        id: Date.now() + 1,
+        text: reply,
+        isAI: true,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      chatHistoryAPI.saveMessage(aiMessage);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: Date.now() + 2,
+        text: "I'm here with you, but something went wrong. Can you try again?",
+        isAI: true,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      // 🔥 CRITICAL FIX — stops infinite "Thinking…"
+      setIsTyping(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-8 md:pl-64 flex flex-col">
       <Navigation />
 
+      {/* Header */}
       <motion.div
-        className="px-6 py-4 border-b border-border bg-charcoal-deep/50 backdrop-blur-lg md:ml-0"
+        className="px-6 py-4 border-b border-border bg-charcoal-deep/50 backdrop-blur-lg"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -92,15 +106,19 @@ const Chat = () => {
             </div>
             <div>
               <h1 className="font-display text-xl text-foreground">Anahva</h1>
-              <p className="text-xs text-muted-foreground">Your sanctuary for thoughts</p>
+              <p className="text-xs text-muted-foreground">
+                Your sanctuary for thoughts
+              </p>
             </div>
           </div>
+
           {isNightMode && (
             <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-1 rounded-full w-fit">
               <Moon className="w-3 h-3" />
               <span>Night-Watch Mode: Gentle listening</span>
             </div>
           )}
+
           {isConfidential && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full w-fit mt-2">
               <span>Confidential Mode: No memory stored</span>
@@ -109,6 +127,7 @@ const Chat = () => {
         </div>
       </motion.div>
 
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="max-w-2xl mx-auto space-y-4">
           <AnimatePresence>
@@ -117,23 +136,29 @@ const Chat = () => {
                 key={message.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`flex ${message.isAI ? 'justify-start' : 'justify-end'}`}
+                transition={{ delay: index * 0.05 }}
+                className={`flex ${message.isAI ? 'justify-start' : 'justify-end'
+                  }`}
               >
                 <div
-                  className={`max-w-[85%] ${message.isAI ? 'chat-bubble-ai' : 'chat-bubble bg-primary/20'
+                  className={`max-w-[85%] ${message.isAI
+                      ? 'chat-bubble-ai'
+                      : 'chat-bubble bg-primary/20'
                     }`}
                 >
-                  <p className="text-foreground leading-relaxed">{message.text}</p>
+                  <p className="text-foreground leading-relaxed">
+                    {message.text}
+                  </p>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
 
+          {/* Thinking indicator */}
           <AnimatePresence>
             {isTyping && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 className="flex justify-start"
@@ -154,7 +179,7 @@ const Chat = () => {
                     ))}
                   </div>
                   <span className="text-sm text-muted-foreground ml-2">
-                    Thinking...
+                    Thinking…
                   </span>
                 </div>
               </motion.div>
@@ -165,6 +190,7 @@ const Chat = () => {
         </div>
       </div>
 
+      {/* Input */}
       <motion.div
         className="px-6 py-4 border-t border-border bg-charcoal-deep/50 backdrop-blur-lg"
         initial={{ opacity: 0, y: 20 }}
@@ -172,7 +198,7 @@ const Chat = () => {
       >
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <motion.button
-            className="p-3 rounded-xl bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            className="p-3 rounded-xl bg-secondary text-muted-foreground hover:text-foreground"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -191,9 +217,9 @@ const Chat = () => {
           <motion.button
             onClick={handleSend}
             disabled={!input.trim()}
-            className={`p-3 rounded-xl transition-all ${input.trim()
-              ? 'bg-primary text-primary-foreground glow-gold'
-              : 'bg-secondary text-muted-foreground'
+            className={`p-3 rounded-xl ${input.trim()
+                ? 'bg-primary text-primary-foreground glow-gold'
+                : 'bg-secondary text-muted-foreground'
               }`}
             whileHover={input.trim() ? { scale: 1.05 } : {}}
             whileTap={input.trim() ? { scale: 0.95 } : {}}
