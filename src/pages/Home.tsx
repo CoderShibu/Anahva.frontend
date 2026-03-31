@@ -135,7 +135,7 @@ const Home = () => {
                     </div>
                   </div>
                   <p className="text-[#b8a898] font-display italic text-lg leading-relaxed group-hover:text-[#ede4d8] transition-colors line-clamp-2">
-                    "{entry.text}"
+                    "{entry.text.includes('encorporately forcing me') ? 'A moment of quiet reflection...' : entry.text}"
                   </p>
                 </motion.div>
               )) : (

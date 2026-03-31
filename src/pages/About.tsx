@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import Navigation from '@/components/Navigation';
+// Navigation removed for standalone page
 import AnahvaLogo from '@/components/AnahraLogo';
 import { Heart, Shield, Lock, Mail, Sparkles, Users, Globe, Github, Twitter, Linkedin, ExternalLink } from 'lucide-react';
 import { useEffect } from 'react';
@@ -24,8 +24,17 @@ const About = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0b09] pb-24 md:pb-12 md:pl-[240px] text-[#ede4d8] font-body">
-      <Navigation />
+    <div className="min-h-screen bg-[#0e0b09] pb-24 md:pb-12 text-[#ede4d8] font-body relative overflow-y-auto">
+      {/* Standalone Header */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-10 py-6 bg-[#0e0b09]/80 backdrop-blur-md border-b border-white/[0.06]">
+        <div className="flex items-center gap-3 text-2xl font-light tracking-widest font-display text-foreground">
+          <div className="w-2 h-2 rounded-full bg-[#d4882a] shadow-[0_0_12px_#d4882a]" />
+          Anahva
+        </div>
+        <button onClick={() => window.history.back()} className="px-6 py-2 rounded-full border border-[#d4882a]/18 text-[#d4882a] text-sm font-medium hover:bg-[#d4882a]/[0.05] transition-all">
+          Go Back
+        </button>
+      </nav>
       
       <main className="max-w-4xl mx-auto px-6 pt-24 md:pt-32">
         {/* HERO SECTION */}

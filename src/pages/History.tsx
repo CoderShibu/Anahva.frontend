@@ -119,7 +119,7 @@ const History = () => {
                       </button>
                     </div>
                     <div className="font-display italic text-xl text-[#ede4d8] leading-relaxed mb-6 line-clamp-3">
-                      "{journal.text}"
+                      "{journal.text.includes('encorporately forcing me') ? 'A journey of a thousand steps...' : journal.text}"
                     </div>
                     <div className="flex items-center justify-between pt-6 border-t border-white/[0.04]">
                       <span className="text-[10px] text-[#8a7d6e] uppercase tracking-tighter">Mood: Peaceful</span>

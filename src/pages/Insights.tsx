@@ -76,7 +76,7 @@ const Insights = () => {
                 <Calendar className="w-5 h-5 text-[#d4882a]" />
                 <h3 className="text-xl font-display text-[#ede4d8]">Weekly Mood</h3>
               </div>
-              <div className="text-xs text-[#8a7d6e] uppercase tracking-wider font-body">March 2024</div>
+              <div className="text-xs text-[#8a7d6e] uppercase tracking-wider font-body">March 2026</div>
             </div>
 
             <div className="grid grid-cols-7 gap-4">

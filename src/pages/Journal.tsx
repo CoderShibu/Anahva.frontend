@@ -116,15 +116,16 @@ const Journal = () => {
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
             {[
-              { color: "#5DCAA5", val: 1 },
-              { color: "#8BDEB1", val: 2 },
-              { color: "#EF9F27", val: 3 },
-              { color: "#E67E22", val: 4 },
-              { color: "#C0392B", val: 5 }
+              { color: "#5DCAA5", val: 1, label: "Calm" },
+              { color: "#8BDEB1", val: 2, label: "Good" },
+              { color: "#EF9F27", val: 3, label: "Neutral" },
+              { color: "#E67E22", val: 4, label: "Restless" },
+              { color: "#C0392B", val: 5, label: "Anxious" }
             ].map((m) => (
               <button
                 key={m.val}
                 onClick={() => setMood(m.val)}
+                title={m.label}
                 className={`w-3.5 h-3.5 rounded-full transition-all transform hover:scale-125 ${mood === m.val ? 'ring-2 ring-offset-2 ring-offset-[#0e0b09] ring-[#d4882a]' : ''}`}
                 style={{ backgroundColor: m.color }}
               />
@@ -142,7 +143,7 @@ const Journal = () => {
       </header>
 
       {/* TEXT AREA */}
-      <main className="w-full max-w-3xl flex-1 px-6 pt-10">
+      <main className="w-full max-w-[800px] flex-1 px-6 pt-10 mx-auto">
         <textarea
           autoFocus
           value={content}

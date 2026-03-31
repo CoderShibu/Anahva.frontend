@@ -40,16 +40,16 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative z-10 w-full min-h-screen">
+    <div className="relative z-10 w-full min-h-screen overflow-y-auto">
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-10 py-6 bg-gradient-to-bottom from-[#0e0b09]/95 to-transparent">
+      <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-10 py-6 bg-gradient-to-b from-[#0e0b09]/95 to-transparent">
         <div className="flex items-center gap-3 text-2xl font-light tracking-widest font-display text-foreground">
           <div className="w-2 h-2 rounded-full bg-[#d4882a] shadow-[0_0_12px_#d4882a] animate-pulse" />
           Anahva
         </div>
         <div className="flex items-center gap-6">
           <a href="#features" className="text-sm font-light text-[#b8a898] hover:text-foreground transition-colors">Features</a>
-          <a href="#about" className="text-sm font-light text-[#b8a898] hover:text-foreground transition-colors">About</a>
+          <button onClick={() => navigate('/about')} className="text-sm font-light text-[#b8a898] hover:text-foreground transition-colors">About</button>
           <a href="#login" className="px-6 py-2 rounded-full bg-[#d4882a] text-[#0e0b09] text-sm font-medium hover:bg-[#f0a84a] transition-all transform hover:-translate-y-0.5">
             Start journaling
           </a>
@@ -79,7 +79,9 @@ const Auth = () => {
             >
               Begin your journey
             </button>
-            <button className="px-8 py-3.5 rounded-full border-[0.5px] border-[#d4882a]/18 text-[#b8a898] hover:text-foreground hover:bg-[#d4882a]/[0.06] transition-all">
+            <button 
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-3.5 rounded-full border-[0.5px] border-[#d4882a]/18 text-[#b8a898] hover:text-foreground hover:bg-[#d4882a]/[0.06] transition-all">
               See how it works
             </button>
           </div>
@@ -124,7 +126,7 @@ const Auth = () => {
             <motion.div 
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-5 right-[-10px] bg-[#1e1814]/92 border-[0.5px] border-[#d4882a]/18 rounded-xl p-3 backdrop-blur-xl shadow-2xl"
+              className="absolute top-5 right-2 bg-[#1e1814]/92 border-[0.5px] border-[#d4882a]/18 rounded-xl p-3 backdrop-blur-xl shadow-2xl z-20"
             >
               <div className="text-[10px] uppercase tracking-wider text-[#8a7d6e] mb-1">Today's mood</div>
               <div className="flex gap-1 mb-1">
@@ -140,7 +142,7 @@ const Auth = () => {
             <motion.div 
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-              className="absolute bottom-16 left-[-30px] bg-[#1e1814]/92 border-[0.5px] border-[#d4882a]/18 rounded-xl p-3 backdrop-blur-xl shadow-2xl max-w-[160px]"
+              className="absolute bottom-16 left-2 bg-[#1e1814]/92 border-[0.5px] border-[#d4882a]/18 rounded-xl p-3 backdrop-blur-xl shadow-2xl max-w-[160px] z-20"
             >
               <div className="text-[10px] uppercase tracking-wider text-[#8a7d6e] mb-1">AI reflection</div>
               <div className="text-xs font-medium italic text-[#b8a898] leading-relaxed">
