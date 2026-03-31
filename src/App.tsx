@@ -22,6 +22,7 @@ import SafeCircle from "./pages/SafeCircle";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
+import PsychologicalReport from "./pages/PsychologicalReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const AppRoutes = () => {
       <Route path="/safe-circle" element={<ProtectedRoute><SafeCircle /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+      <Route path="/report" element={<ProtectedRoute><PsychologicalReport /></ProtectedRoute>} />
       <Route path="/faq" element={<ProtectedRoute><FAQ /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

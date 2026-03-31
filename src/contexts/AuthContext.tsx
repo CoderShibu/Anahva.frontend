@@ -81,13 +81,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = async () => {
+    setUser(null);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     try {
-      await authAPI.logout();
+      authAPI.logout(); 
     } catch (error) {
       console.error('Logout error:', error);
     }
-    setUser(null);
-    localStorage.removeItem('authToken');
   };
 
   return (

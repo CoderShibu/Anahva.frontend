@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Sparkles, Music, Wind, X, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Save, Sparkles, Music, Wind, X, ChevronRight, Smile } from 'lucide-react';
 import { journalAPI, chatAPI } from '@/lib/api';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +18,9 @@ const Journal = () => {
   const [ambientSound, setAmbientSound] = useState<'none' | 'rain' | 'forest'>('none');
   const [aiResponse, setAiResponse] = useState('');
   const [isThinking, setIsThinking] = useState(false);
+  const [showEmojis, setShowEmojis] = useState(false);
+  
+  const stickers = ["✨", "🌙", "🌿", "🧘", "🙏", "🌊", "🕯️", "🌅", "☁️", "🍃", "💫", "🎐"];
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -156,7 +159,42 @@ const Journal = () => {
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 p-1 rounded-full bg-white/[0.03] border border-white/[0.04]">
+            <div className="relative">
+              <button 
+                onClick={() => setShowEmojis(!showEmojis)}
+                className={`p-2 rounded-xl border transition-all ${showEmojis ? 'bg-[#d4882a]/10 border-[#d4882a]/30 text-[#d4882a]' : 'bg-white/[0.03] border-white/[0.04] text-[#8a7d6e] hover:text-[#ede4d8]'}`}
+                title="Add Sticker"
+              >
+                <Smile className="w-4 h-4" />
+              </button>
+              <AnimatePresence>
+                {showEmojis && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute bottom-full right-0 mb-4 p-4 bg-[#161210] border border-white/[0.08] rounded-2xl shadow-2xl z-50 min-w-[200px]"
+                  >
+                    <div className="grid grid-cols-4 gap-2">
+                       {stickers.map(s => (
+                         <button 
+                           key={s}
+                           onClick={() => {
+                             setContent(prev => prev + s);
+                             setShowEmojis(false);
+                           }}
+                           className="text-xl p-2 hover:bg-white/[0.05] rounded-lg transition-colors"
+                         >
+                           {s}
+                         </button>
+                       ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="flex items-center gap-2 p-1 rounded-full bg-white/[0.03] border border-white/[0.04]">
             <button 
               onClick={() => setAmbientSound('none')}
               className={`p-1.5 rounded-full text-[10px] uppercase font-bold transition-all ${ambientSound === 'none' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}

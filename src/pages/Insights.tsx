@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Navigation from '@/components/Navigation';
 import { TrendingUp, Activity, Sparkles, Calendar, MessageSquare, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { journalAPI } from '@/lib/api';
 import { getJournalHistory } from '@/api/journal';
 
@@ -11,6 +12,7 @@ const Insights = () => {
   const [journals, setJournals] = useState<any[]>([]);
   const [stats, setStats] = useState({ streak: 0, total: 0 });
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
@@ -223,7 +225,10 @@ const Insights = () => {
               <div className="text-[11px] text-[#8a7d6e]">Your latest 30 days are ready for a full psychological profile.</div>
             </div>
           </div>
-          <button className="px-6 py-2 rounded-full border border-[#d4882a]/18 text-[#d4882a] text-xs font-medium hover:bg-[#d4882a]/[0.05] transition-all">
+          <button 
+            onClick={() => navigate('/report')}
+            className="px-6 py-2 rounded-full border border-[#d4882a]/18 text-[#d4882a] text-xs font-medium hover:bg-[#d4882a]/[0.05] transition-all"
+          >
             Generate Report
           </button>
         </motion.div>

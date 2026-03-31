@@ -159,6 +159,27 @@
     background: linear-gradient(135deg, hsl(0 0% 12%) 0%, hsl(0 0% 8%) 100%);
     border-left: 2px solid hsl(var(--gold) / 0.5);
   }
+
+  .cursor-glow {
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(212,136,42,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+
+  @media (max-width: 768px) {
+    .md\:pl-\[240px\] {
+      padding-left: 0 !important;
+    }
+    .safe-padding {
+      @apply px-4 py-6;
+    }
+  }
 }
 
 @layer utilities {

@@ -6,6 +6,8 @@ import { useAccessibility } from '@/contexts/AccessibilityContext';
 import Navigation from '@/components/Navigation';
 import { Globe, Eye, Shield, LogOut, Lock, ChevronRight, Bell, Trash2, Download } from 'lucide-react';
 
+import { toast } from 'sonner';
+
 const Settings = () => {
   const { user, logout } = useAuth();
   const { reducedMotion, setReducedMotion } = useAccessibility();
@@ -14,6 +16,32 @@ const Settings = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const exportData = () => {
+    const data = localStorage.getItem('anahva_journals');
+    if (!data) {
+        toast.error("No data found to export.");
+        return;
+    }
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `anahva_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Data exported successfully.");
+  };
+
+  const deleteData = () => {
+    if (confirm("Are you sure? This will delete all your sacred entries permanently. This action cannot be undone.")) {
+        localStorage.removeItem('anahva_journals');
+        toast.success("All entries have been cleared.");
+        setTimeout(() => window.location.reload(), 1500);
+    }
   };
 
   return (
@@ -140,14 +168,20 @@ const Settings = () => {
         >
           <h3 className="text-[11px] uppercase tracking-widest text-[#8a7d6e] px-2 font-body font-bold">Data Management</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button className="p-6 rounded-[20px] bg-[#161210] border border-white/[0.04] flex items-center justify-between group hover:border-[#d4882a]/30 transition-all">
+            <button 
+              onClick={exportData}
+              className="p-6 rounded-[20px] bg-[#161210] border border-white/[0.04] flex items-center justify-between group hover:border-[#d4882a]/30 transition-all text-left"
+            >
               <div className="flex items-center gap-4">
                 <Download className="w-5 h-5 text-[#8a7d6e] group-hover:text-[#d4882a] transition-colors" />
                 <span className="text-sm">Export Data (JSON)</span>
               </div>
               <ChevronRight className="w-4 h-4 text-[#8a7d6e]" />
             </button>
-            <button className="p-6 rounded-[20px] bg-[#161210] border border-white/[0.04] flex items-center justify-between group hover:border-[#ff4b4b]/30 transition-all">
+            <button 
+              onClick={deleteData}
+              className="p-6 rounded-[20px] bg-[#161210] border border-white/[0.04] flex items-center justify-between group hover:border-[#ff4b4b]/30 transition-all text-left"
+            >
               <div className="flex items-center gap-4">
                 <Trash2 className="w-5 h-5 text-[#8a7d6e] group-hover:text-[#ff4b4b] transition-colors" />
                 <span className="text-sm">Delete All Entries</span>
