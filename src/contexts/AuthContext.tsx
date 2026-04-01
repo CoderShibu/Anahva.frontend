@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Backend login failed:', error);
     }
 
-    // Fallback to local storage for demo
+    // Login from local storage
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const foundUser = users.find((u: any) => u.name === name && u.password === password);
     
@@ -52,11 +52,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return true;
     }
     
-    if ((name === 'Shibasish' && password === 'Shibasish') || 
-        (name === 'shibasish2005@gmail.com' && password === 'shibasish')) {
-      setUser({ name: 'Shibasish' });
-      return true;
-    }
     return false;
   };
 

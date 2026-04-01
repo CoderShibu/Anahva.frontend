@@ -1,15 +1,18 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import Navigation from '@/components/Navigation';
-import { Globe, Eye, Shield, LogOut, Lock, ChevronRight, Bell, Trash2, Download } from 'lucide-react';
+import { Globe, Eye, Shield, LogOut, Lock, ChevronRight, Bell, Trash2, Download, User, FileText, CreditCard, ArrowUpCircle } from 'lucide-react';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import LockedFeature from '@/components/LockedFeature';
 
 import { toast } from 'sonner';
 
 const Settings = () => {
   const { user, logout } = useAuth();
+  const { plan, entriesThisMonth } = useSubscription();
   const { reducedMotion, setReducedMotion } = useAccessibility();
   const navigate = useNavigate();
 
@@ -78,6 +81,65 @@ const Settings = () => {
           <button className="px-6 py-2 rounded-full border border-white/[0.06] text-[#ede4d8] text-xs font-medium hover:bg-white/[0.02] transition-colors">
             Edit Profile
           </button>
+        </motion.div>
+
+        {/* SUBSCRIPTION SECTION */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="space-y-4 mb-10"
+        >
+          <h3 className="text-[11px] uppercase tracking-widest text-[#8a7d6e] px-2 font-body font-bold">Your plan</h3>
+          <div className="p-8 rounded-[24px] bg-[#231e19] border border-white/[0.06] overflow-hidden relative shadow-lg">
+             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                <div className="flex items-center gap-5">
+                   <div className="w-12 h-12 rounded-2xl bg-[#d4882a]/10 flex items-center justify-center text-[#d4882a] border border-[#d4882a]/20">
+                      <CreditCard className="w-6 h-6" />
+                   </div>
+                   <div>
+                      <div className="flex items-center gap-2 mb-1">
+                         <h2 className="text-xl font-display text-[#ede4d8] capitalize">{plan} Plan</h2>
+                         <span className="px-2 py-0.5 rounded-full bg-[#d4882a]/10 border border-[#d4882a]/40 text-[#d4882a] text-[9px] font-bold uppercase tracking-wider">Active</span>
+                      </div>
+                      <p className="text-[#8a7d6e] text-xs">
+                        {plan === 'free' ? "You're on the standard free plan" : `Next billing: ${new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toLocaleDateString()} · ₹${plan === 'pro' ? '249' : '99'}/mo`}
+                      </p>
+                   </div>
+                </div>
+                {plan === 'free' ? (
+                   <button 
+                     onClick={() => navigate('/pricing')}
+                     className="px-6 py-2.5 rounded-full bg-[#d4882a] text-[#0e0b09] text-xs font-bold hover:bg-[#f0a84a] transition-all flex items-center gap-2 w-fit"
+                   >
+                     <ArrowUpCircle className="w-4 h-4" />
+                     Upgrade →
+                   </button>
+                ) : (
+                   <div className="flex items-center gap-3">
+                      <button className="text-[12px] text-[#8a7d6e] hover:text-[#ede4d8] transition-colors font-medium">Manage billing</button>
+                      <div className="w-1 h-1 rounded-full bg-white/10" />
+                      <button className="text-[12px] text-[#8a7d6e] hover:text-[#E24B4A] transition-colors font-medium">Cancel subscription</button>
+                   </div>
+                )}
+             </div>
+
+             {plan === 'free' && (
+                <div className="pt-6 border-t border-white/[0.04]">
+                   <div className="flex items-center justify-between text-[11px] font-medium mb-2.5">
+                      <span className="text-[#8a7d6e] uppercase tracking-wider">Entries this month</span>
+                      <span className="text-[#ede4d8]">{entriesThisMonth} of 10 used</span>
+                   </div>
+                   <div className="h-1.5 w-full bg-white/[0.02] rounded-full overflow-hidden">
+                      <motion.div 
+                         initial={{ width: 0 }}
+                         animate={{ width: `${(entriesThisMonth / 10) * 100}%` }}
+                         className="h-full bg-[#d4882a] shadow-[0_0_8px_rgba(212,136,42,0.4)]"
+                      />
+                   </div>
+                </div>
+             )}
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
@@ -178,6 +240,17 @@ const Settings = () => {
               </div>
               <ChevronRight className="w-4 h-4 text-[#8a7d6e]" />
             </button>
+            <LockedFeature featureName="Therapist PDF export" requiredPlan="plus" overlayClassName="bg-transparent">
+              <button 
+                className="p-6 rounded-[20px] bg-[#161210] border border-white/[0.04] flex items-center justify-between group hover:border-[#d4882a]/30 transition-all text-left w-full h-full"
+              >
+                <div className="flex items-center gap-4">
+                  <FileText className="w-5 h-5 text-[#8a7d6e] group-hover:text-[#d4882a] transition-colors" />
+                  <span className="text-sm">Therapist PDF Export</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[#8a7d6e]" />
+              </button>
+            </LockedFeature>
             <button 
               onClick={deleteData}
               className="p-6 rounded-[20px] bg-[#161210] border border-white/[0.04] flex items-center justify-between group hover:border-[#ff4b4b]/30 transition-all text-left"

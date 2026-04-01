@@ -123,8 +123,8 @@ const PsychologicalReport = () => {
           <h1 className="text-5xl md:text-[52px] font-display font-light text-[#ede4d8] mb-4">
             30 Days with {user?.name || 'Soul'}
           </h1>
-          <p className="text-[#8a7d6e] font-body text-sm uppercase tracking-widest mb-10">
-            1 Dec 2025 – 31 Dec 2025
+          <p className="text-[#8a7d6e] font-body text-[11px] uppercase tracking-widest mb-10">
+            {new Date(new Date().setDate(new Date().getDate() - 30)).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} – {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
           </p>
           <div className="max-w-2xl mx-auto">
             <p className="font-display italic text-[24px] text-[#ede4d8] leading-relaxed">

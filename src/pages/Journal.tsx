@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Sparkles, Music, Wind, X, ChevronRight, Smile } from 'lucide-react';
+import { ArrowLeft, Save, Sparkles, Music, Wind, X, ChevronRight, Smile, Mic, Coffee, Waves, VolumeX } from 'lucide-react';
 import { journalAPI, chatAPI } from '@/lib/api';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import LockedFeature from '@/components/LockedFeature';
 import { toast } from 'sonner';
 
 const Journal = () => {
@@ -15,10 +17,12 @@ const Journal = () => {
   const [mood, setMood] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showAI, setShowAI] = useState(false);
-  const [ambientSound, setAmbientSound] = useState<'none' | 'rain' | 'forest'>('none');
+  const [ambientSound, setAmbientSound] = useState<'none' | 'rain' | 'forest' | 'cafe' | 'ocean'>('none');
   const [aiResponse, setAiResponse] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [journalLang, setJournalLang] = useState<'EN' | 'HI'>('EN');
+  const { plan } = useSubscription();
   
   const stickers = ["✨", "🌙", "🌿", "🧘", "🙏", "🌊", "🕯️", "🌅", "☁️", "🍃", "💫", "🎐"];
   
@@ -29,30 +33,44 @@ const Journal = () => {
 
   // Ambient Sound Logic
   useEffect(() => {
-    if (ambientSound === 'none') {
+    // Thorough cleanup of previous audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+
+    if (ambientSound === 'none') return;
+
+    const soundUrls = {
+      rain: 'https://www.soundjay.com/nature/sounds/rain-01.mp3',
+      forest: 'https://www.soundjay.com/nature/sounds/forest-birds-01.mp3',
+      cafe: 'https://www.soundjay.com/misc/sounds/coffee-shop-1.mp3',
+      ocean: 'https://www.soundjay.com/nature/sounds/ocean-waves-1.mp3'
+    };
+
+    try {
+      const audio = new Audio(soundUrls[ambientSound as keyof typeof soundUrls]);
+      audio.loop = true;
+      audio.volume = 0.4;
+      
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.warn("Autoplay blocked. Interaction requested for ambient sound.", error);
+        });
+      }
+      
+      audioRef.current = audio;
+    } catch (err) {
+      console.error("Failed to initialize audio:", err);
+    }
+
+    return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
-      return;
-    }
-
-    const soundUrls = {
-      rain: 'https://actions.google.com/sounds/v1/water/rain_on_roof.ogg',
-      forest: 'https://actions.google.com/sounds/v1/ambiance/morning_forest.ogg'
-    };
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-
-    const audio = new Audio(soundUrls[ambientSound as keyof typeof soundUrls]);
-    audio.loop = true;
-    audio.play().catch(e => console.log("Audio play blocked by browser. Interaction required."));
-    audioRef.current = audio;
-
-    return () => {
-      audio.pause();
     };
   }, [ambientSound]);
 
@@ -69,6 +87,19 @@ const Journal = () => {
       if (!silent) setIsSaving(false);
     }
   };
+
+  // Word count milestones
+  useEffect(() => {
+    const milestones = [100, 250, 500];
+    milestones.forEach(m => {
+      if (wordCount === m) {
+        toast.success(`${m} words · Keep going ✦`, {
+          duration: 2000,
+          position: 'bottom-center'
+        });
+      }
+    });
+  }, [wordCount]);
 
   // Auto-save logic
   useEffect(() => {
@@ -88,7 +119,10 @@ const Journal = () => {
     if (!content.trim()) return;
     setIsThinking(true);
     try {
-      const res = await chatAPI.sendMessage(`Based on my journal entry, can you provide a short empathetic reflection? Entry: ${content}`, 'REFLECT');
+      const prompt = journalLang === 'HI' ? 
+        `मेरे जर्नल प्रविष्टि के आधार पर, क्या आप एक संक्षिप्त सहानुभूतिपूर्ण प्रतिबिंब प्रदान कर सकते हैं? प्रविष्टि: ${content}` : 
+        `Based on my journal entry, can you provide a short empathetic reflection? Entry: ${content}`;
+      const res = await chatAPI.sendMessage(prompt, 'REFLECT');
       setAiResponse(typeof res === 'string' ? res : (res.response || res.message));
     } catch (error) {
       setAiResponse("I'm here with you, supporting your journey.");
@@ -143,18 +177,18 @@ const Journal = () => {
       </header>
 
       {/* TEXT AREA */}
-      <main className="w-full max-w-[800px] flex-1 px-6 pt-10 mx-auto">
+      <main className="w-full max-w-[680px] flex-1 px-6 pt-10 mx-auto">
         <textarea
           autoFocus
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="What's on your mind?..."
+          placeholder={journalLang === 'HI' ? "आपके मन में क्या है?..." : "What's on your mind?..."}
           className="w-full h-full min-h-[70vh] bg-transparent border-none outline-none font-display text-[22px] leading-[1.8] text-[#ede4d8] placeholder:text-[#8a7d6e]/40 placeholder:italic resize-none"
         />
       </main>
 
       {/* BOTTOM TOOLBAR */}
-      <footer className="w-full max-w-5xl px-6 py-10 flex items-center justify-between">
+      <footer className="w-full max-w-[680px] px-6 py-10 flex items-center justify-between mx-auto">
         <div className="text-xs text-[#8a7d6e] tracking-wider font-body">
           {wordCount} WORDS
         </div>
@@ -195,36 +229,82 @@ const Journal = () => {
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center gap-2 p-1 rounded-full bg-white/[0.03] border border-white/[0.04]">
-            <button 
-              onClick={() => setAmbientSound('none')}
-              className={`p-1.5 rounded-full text-[10px] uppercase font-bold transition-all ${ambientSound === 'none' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
-            >
-              Off
-            </button>
-            <button 
-              onClick={() => setAmbientSound('rain')}
-              className={`p-1.5 rounded-full flex items-center gap-1.5 transition-all ${ambientSound === 'rain' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
-            >
-              <Music className="w-3 h-3" />
-              <span className="text-[10px] uppercase font-bold">Rain</span>
-            </button>
-            <button 
-              onClick={() => setAmbientSound('forest')}
-              className={`p-1.5 rounded-full flex items-center gap-1.5 transition-all ${ambientSound === 'forest' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
-            >
-              <Wind className="w-3 h-3" />
-              <span className="text-[10px] uppercase font-bold">Forest</span>
-            </button>
-          </div>
+            <div className="flex items-center gap-2 p-1 rounded-full bg-white/[0.03] border border-white/[0.04] overflow-x-auto no-scrollbar max-w-[280px]">
+              <button 
+                onClick={() => setAmbientSound('none')}
+                className={`px-3 py-1.5 rounded-full text-[9px] uppercase font-bold transition-all shrink-0 ${ambientSound === 'none' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
+              >
+                Silence
+              </button>
+              <button 
+                onClick={() => setAmbientSound('rain')}
+                className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all shrink-0 ${ambientSound === 'rain' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
+              >
+                <Music className="w-3 h-3" />
+                <span className="text-[9px] uppercase font-bold">Rain</span>
+              </button>
+              <button 
+                onClick={() => setAmbientSound('forest')}
+                className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all shrink-0 ${ambientSound === 'forest' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
+              >
+                <Wind className="w-3 h-3" />
+                <span className="text-[9px] uppercase font-bold">Forest</span>
+              </button>
+              
+              <LockedFeature featureName="Extra sounds" requiredPlan="plus" overlayClassName="bg-transparent" className="shrink-0">
+                <button 
+                  onClick={() => setAmbientSound('cafe')}
+                  className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all ${ambientSound === 'cafe' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
+                >
+                  <Coffee className="w-3 h-3" />
+                  <span className="text-[9px] uppercase font-bold">Café ✦</span>
+                </button>
+              </LockedFeature>
+              <LockedFeature featureName="Extra sounds" requiredPlan="plus" overlayClassName="bg-transparent" className="shrink-0">
+                <button 
+                  onClick={() => setAmbientSound('ocean')}
+                  className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all ${ambientSound === 'ocean' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
+                >
+                  <Waves className="w-3 h-3" />
+                  <span className="text-[9px] uppercase font-bold">Ocean ✦</span>
+                </button>
+              </LockedFeature>
+            </div>
+            
+            <div className="h-4 w-px bg-white/10" />
+
+            <div className="flex items-center gap-3">
+               <LockedFeature featureName="Voice journaling" requiredPlan="pro" overlayClassName="bg-transparent">
+                  <button className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.04] text-[#8a7d6e] hover:text-[#d4882a] transition-all">
+                    <Mic className="w-4 h-4" />
+                  </button>
+               </LockedFeature>
+
+               <div className="flex p-1 rounded-full bg-white/[0.03] border border-white/[0.04]">
+                  <button 
+                    onClick={() => setJournalLang('EN')}
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${journalLang === 'EN' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
+                  >
+                    EN
+                  </button>
+                  <LockedFeature featureName="Hindi journaling" requiredPlan="pro" overlayClassName="bg-transparent">
+                    <button 
+                      onClick={() => setJournalLang('HI')}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${journalLang === 'HI' ? 'bg-[#d4882a] text-[#0e0b09]' : 'text-[#8a7d6e]'}`}
+                    >
+                      HI
+                    </button>
+                  </LockedFeature>
+               </div>
+            </div>
 
           <button 
             onClick={() => { setShowAI(true); handleAskAI(); }}
             disabled={isThinking}
-            className="flex items-center gap-2 px-5 py-2 rounded-full border border-[#d4882a]/18 text-[#d4882a] text-xs font-medium hover:bg-[#d4882a]/[0.05] transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2 rounded-full bg-[#d4882a] text-[#0e0b09] text-xs font-bold hover:bg-[#f0a84a] transition-all disabled:opacity-50 shadow-lg shadow-[#d4882a]/20"
           >
             <Sparkles className={`w-3.5 h-3.5 ${isThinking ? 'animate-spin' : ''}`} />
-            {isThinking ? "Thinking..." : "Ask AI"}
+            {isThinking ? "Thinking..." : "✦ Ask AI"}
           </button>
         </div>
       </footer>

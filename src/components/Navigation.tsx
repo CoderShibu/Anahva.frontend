@@ -4,8 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useConfidentialMode } from '@/contexts/ConfidentialModeContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Home, BookOpen, BarChart3, Settings, Calendar, Bell, User, Eye, EyeOff, Moon, Sun, Globe } from 'lucide-react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import LockedFeature from './LockedFeature';
 import LanguageToggle from './LanguageToggle';
 
 const Navigation = () => {
@@ -14,6 +15,7 @@ const Navigation = () => {
   const { isConfidential, toggleConfidential } = useConfidentialMode();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showLang, setShowLang] = useState(false);
 
   const navItems = [
@@ -34,32 +36,6 @@ const Navigation = () => {
         </div>
         <div />
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <button 
-                onClick={() => setShowLang(!showLang)}
-                className="p-2 rounded-full hover:bg-white/[0.06] text-[#8a7d6e] transition-colors"
-            >
-                <Globe className="w-5 h-5" />
-            </button>
-            <AnimatePresence>
-                {showLang && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 mt-2 z-[100] min-w-[200px]"
-                    >
-                        <div className="p-2 bg-[#161210] border border-white/[0.08] rounded-2xl shadow-2xl">
-                             <LanguageToggle />
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-          </div>
-          <button className="p-2 rounded-full hover:bg-white/[0.06] transition-colors relative">
-            <Bell className="w-5 h-5 text-[#8a7d6e] hover:text-[#ede4d8] transition-colors" />
-            <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#d4882a] rounded-full border border-[#0e0b09]" />
-          </button>
           <div className="w-9 h-9 rounded-full bg-[#d4882a] flex items-center justify-center text-[#0e0b09] font-medium text-sm">
             {user?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
@@ -79,7 +55,7 @@ const Navigation = () => {
             <button 
                 onClick={toggleConfidential}
                 className={`w-full p-2 rounded-xl flex items-center justify-center gap-2 border transition-all ${isConfidential ? 'bg-[#d4882a]/10 border-[#d4882a]/30 text-[#d4882a]' : 'bg-white/[0.02] border-white/[0.06] text-[#8a7d6e] hover:text-[#ede4d8]'}`}
-                title={isConfidential ? "Disable Confidential Mode" : "Enable Confidential Mode"}
+                title="Hides all entry content — tap to show"
             >
                 {isConfidential ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 <span className="text-[10px] font-bold uppercase">Safe Mode</span>
@@ -113,6 +89,17 @@ const Navigation = () => {
               );
             })}
           </ul>
+
+          <div className="mt-4 px-5">
+             <LockedFeature featureName="Multiple journals" requiredPlan="pro">
+                <button className="flex items-center gap-3 w-full py-2 group">
+                   <div className="w-5 h-5 rounded-md border border-dashed border-[#8a7d6e]/40 flex items-center justify-center text-[#8a7d6e] group-hover:border-[#d4882a]/40 transition-colors">
+                      <span className="text-xs">+</span>
+                   </div>
+                   <span className="text-[12px] font-medium text-[#8a7d6e] group-hover:text-[#b8a898]">New journal</span>
+                </button>
+             </LockedFeature>
+          </div>
         </nav>
 
         <div className="p-6 border-t border-white/[0.06]">
@@ -131,7 +118,7 @@ const Navigation = () => {
       {/* MOBILE TAB BAR */}
       <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-[#161210]/90 backdrop-blur-xl border-t border-white/[0.06] md:hidden">
         <div className="flex justify-around items-center py-3 px-2">
-          {navItems.slice(0, 4).map((item) => {
+          {navItems.map((item) => {
             const isActive = location.pathname === item.to;
             return (
               <NavLink
@@ -148,6 +135,19 @@ const Navigation = () => {
           })}
         </div>
       </nav>
+
+      {/* GLOBAL NEW ENTRY FAB */}
+      <motion.button 
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate('/journal')}
+        className="fixed bottom-24 right-6 md:bottom-12 md:right-12 z-[150] flex items-center gap-3 px-6 py-4 rounded-full bg-[#d4882a] text-[#0e0b09] shadow-[0_8px_30px_rgb(212,136,42,0.3)] hover:shadow-[0_8px_40px_rgb(212,136,42,0.4)] transition-all"
+      >
+        <span className="text-xl font-light font-display">+</span>
+        <span className="font-display text-lg font-medium">Write</span>
+      </motion.button>
     </>
   );
 };
